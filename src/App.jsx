@@ -1,4 +1,5 @@
 import { Canvas, useFrame } from '@react-three/fiber'
+import { CameraControls } from '@react-three/drei'
 import { useRef } from 'react'
 import './App.css'
 
@@ -82,26 +83,28 @@ const TorusKnot = ({position, size, color}) => {
 
 const Capsule = ({colorCode}) => {
   const ref = useRef()
+
+  //let each capsule that orbits around the center has its own unique characteristics
   let height = Math.random() * 0.3 + 0.1
   let radius = Math.random() * 0.15 + 0.1
   let color = ['#FF5F1F','#FF4433','#FFBF00','#C04000', '#FA3361', '#72031D', '#FB6084']
   let orbitalVectorXZ = Math.random() * 2.5 + 1.25
-  let orbitalVectorY = Math.random() * 0.25 + 0.1 
-  let orbitalRadius = Math.random() * 2.5 + 1.75
-  let positionRandomness = Math.random() * 4
+  let orbitalRadius = Math.random() * 10 + 5
+  let positionRandomness = Math.random() * 6 - 2
+  let rotationSpeed = Math.random() * 2 + 1
+  let yPosition = Math.random() * 6 - 3
 
   useFrame((state, delta) => {
-    ref.current.rotation.y += delta * 2
-    ref.current.rotation.x += delta * 2
+    ref.current.rotation.y += delta * rotationSpeed
+    ref.current.rotation.x += delta * rotationSpeed
 
-    ref.current.position.x = Math.cos(state.clock.elapsedTime) * orbitalRadius * orbitalVectorXZ + positionRandomness
-    ref.current.position.y = Math.sin(state.clock.elapsedTime) * orbitalRadius * orbitalVectorY + positionRandomness
-    ref.current.position.z = Math.sin(state.clock.elapsedTime) * orbitalRadius * orbitalVectorXZ + positionRandomness
+    ref.current.position.x = Math.cos(state.clock.elapsedTime + orbitalVectorXZ) * orbitalRadius  + positionRandomness
+    ref.current.position.z = Math.sin(state.clock.elapsedTime + orbitalVectorXZ) * orbitalRadius  + positionRandomness
 
   })
 
   return(
-    <mesh position={[0, 0, 0]} ref={ref}>
+    <mesh position={[0, yPosition, 0]} ref={ref}>
       <capsuleGeometry args={[radius, height, 16, 16]} />
       <meshStandardMaterial color={color[colorCode]} />
     </mesh>
@@ -109,38 +112,29 @@ const Capsule = ({colorCode}) => {
 }
 
 const App = () => {
+  const cameraControlsRef = useRef<CameraControls | null >(null)
 
   return ( 
-  
-    <Canvas>
+  <>
+      <Canvas>
+      
+        {/* <CameraControls ref={cameraControlsRef} /> */}
 
-      <directionalLight position ={[0, 0, 3]} intensity={1}/> //light that shines in one spot
-      <ambientLight intensity = {1.5}/> //all directional light
+        <directionalLight position ={[0, 0, 3]} intensity={1}/> //light that shines in one spot
+        <ambientLight intensity = {1.5}/> //all directional light
 
-      {/*
-      <group>
-        <Cube position = {[1, 1, 2]} size={[1, 1, 1]} color={"red"} />
-    
-        <Cube position = {[-1, 1, 2]} size={[1, 1, 1]} color={"blue"} />
+        <group position={[0, 0, -12]}>
+          <Sphere position = {[0, 0, 0]} size = {[1, 32, 32]} color={"lightblue"} />
+          <Torus position = {[0, 0, 0]} size = {[1.75, 0.3, 64, 64]} color={"limegreen"} />  
 
-        <Cube position = {[1, -1, 2]} size={[1, 1, 1]} color={"green"} />
-        
-        <Cube position = {[-1, -1, 2]} size={[1, 1, 1]} color={"yellow"} />
-      </group> 
-      */}
-      <group position={[0, 0, -12]}>
-        <Sphere position = {[0, 0, 0]} size = {[1, 32, 32]} color={"lightblue"} />
-        <Torus position = {[0, 0, 0]} size = {[1.75, 0.3, 64, 64]} color={"limegreen"} />  
-        {/* <TorusKnot position = {[2, -2, 0]} size = {[1, 0.2, 64, 32]} color={"lime"} />   */}
-        <Capsule colorCode={0} />
-        <Capsule colorCode={1} />
-        <Capsule colorCode={2} />
+          {Array.from({ length: 20 }, (_, i) => (
+            <Capsule key={i} colorCode={i % 7} />
+          ))}
+          
+        </group>
 
-        {Array.from({ length: 15 }, (_, i) => (
-          <Capsule key={i} colorCode={i % 7} />
-        ))}
-      </group>
-    </Canvas>
+      </Canvas>
+    </>
   )
 }
 
