@@ -7,5 +7,6 @@
 
 body {
   background-color: darkslategray;
+  background-image: url(C:\Users\USER\Desktop\React-Three-Fiber-Practice\r3f-basics\src\assets\SpacePixelArt.jpg);
   display: flex;
 }

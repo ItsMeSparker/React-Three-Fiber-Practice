@@ -111,7 +111,7 @@ const Capsule = ({colorCode}) => {
 const App = () => {
 
   return ( 
-    //Canvas is the main component that sets up the 3D rendering context and provides a space for us to render our 3D objects
+  
     <Canvas>
 
       <directionalLight position ={[0, 0, 3]} intensity={1}/> //light that shines in one spot
