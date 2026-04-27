@@ -1,4 +1,5 @@
 import { Canvas, useFrame } from '@react-three/fiber'
+import { CameraControls } from '@react-three/drei'
 import { useRef } from 'react'
 import './App.css'
 
@@ -32,14 +33,14 @@ const Sphere = ({position, size, color}) => {
   useFrame((state, delta) => {
     ref.current.rotation.y += delta * 2
     ref.current.rotation.x += delta * 2
-    ref.current.position.z = Math.sin(state.clock.elapsedTime) * 2
+    // ref.current.position.z = Math.sin(state.clock.elapsedTime) * -2
 
   })
 
   return(
     <mesh position={position} ref={ref}>
       <sphereGeometry args={size} />
-      <meshStandardMaterial color={color}/>
+      <meshStandardMaterial color={color} wireframe = {true}/>
     </mesh>
   )
 }
@@ -49,8 +50,8 @@ const Torus = ({position, size, color}) => {
 
   useFrame((state, delta) => {
     ref.current.rotation.y += delta * 2
-    ref.current.rotation.x += delta * 2
-    ref.current.position.z = Math.sin(state.clock.elapsedTime) * 2
+    ref.current.rotation.x += delta * 1
+    // ref.current.position.z = Math.sin(state.clock.elapsedTime) * 2
 
   })
 
@@ -68,7 +69,7 @@ const TorusKnot = ({position, size, color}) => {
   useFrame((state, delta) => {
     ref.current.rotation.y += delta * 2
     ref.current.rotation.x += delta * 2
-    ref.current.position.z = Math.sin(state.clock.elapsedTime) * 2
+    ref.current.position.z = Math.cos(state.clock.elapsedTime) * 0.25
 
   })
 
@@ -80,32 +81,60 @@ const TorusKnot = ({position, size, color}) => {
   )
 }
 
+const Capsule = ({colorCode}) => {
+  const ref = useRef()
+
+  //let each capsule that orbits around the center has its own unique characteristics
+  let height = Math.random() * 0.3 + 0.1
+  let radius = Math.random() * 0.15 + 0.1
+  let color = ['#FF5F1F','#FF4433','#FFBF00','#C04000', '#FA3361', '#72031D', '#FB6084']
+  let orbitalVectorXZ = Math.random() * 2.5 + 1.25
+  let orbitalRadius = Math.random() * 10 + 5
+  let positionRandomness = Math.random() * 6 - 2
+  let rotationSpeed = Math.random() * 2 + 1
+  let yPosition = Math.random() * 6 - 3
+
+  useFrame((state, delta) => {
+    ref.current.rotation.y += delta * rotationSpeed
+    ref.current.rotation.x += delta * rotationSpeed
+
+    ref.current.position.x = Math.cos(state.clock.elapsedTime + orbitalVectorXZ) * orbitalRadius  + positionRandomness
+    ref.current.position.z = Math.sin(state.clock.elapsedTime + orbitalVectorXZ) * orbitalRadius  + positionRandomness
+
+  })
+
+  return(
+    <mesh position={[0, yPosition, 0]} ref={ref}>
+      <capsuleGeometry args={[radius, height, 16, 16]} />
+      <meshStandardMaterial color={color[colorCode]} />
+    </mesh>
+  )
+}
+
 const App = () => {
+  const cameraControlsRef = useRef<CameraControls | null >(null)
 
   return ( 
-    //Canvas is the main component that sets up the 3D rendering context and provides a space for us to render our 3D objects
-    <Canvas>
+  <>
+      <Canvas>
+      
+        {/* <CameraControls ref={cameraControlsRef} /> */}
 
-      <directionalLight position ={[0, 0, 3]}/> //light that shines in one spot
-      <ambientLight intensity = {1.5}/> //all directional light
+        <directionalLight position ={[0, 0, 3]} intensity={1}/> //light that shines in one spot
+        <ambientLight intensity = {1.5}/> //all directional light
 
-      {/*
-      <group>
-        <Cube position = {[1, 1, 2]} size={[1, 1, 1]} color={"red"} />
-    
-        <Cube position = {[-1, 1, 2]} size={[1, 1, 1]} color={"blue"} />
+        <group position={[0, 0, -12]}>
+          <Sphere position = {[0, 0, 0]} size = {[1, 32, 32]} color={"lightblue"} />
+          <Torus position = {[0, 0, 0]} size = {[1.75, 0.3, 64, 64]} color={"limegreen"} />  
 
-        <Cube position = {[1, -1, 2]} size={[1, 1, 1]} color={"green"} />
-        
-        <Cube position = {[-1, -1, 2]} size={[1, 1, 1]} color={"yellow"} />
-      </group> 
-      */}
+          {Array.from({ length: 20 }, (_, i) => (
+            <Capsule key={i} colorCode={i % 7} />
+          ))}
+          
+        </group>
 
-      <Sphere position = {[-2, 0, 0]} size = {[2, 32, 32]} color={"hotpink"} />
-      <Torus position = {[2, 2, 0]} size = {[1, 0.5, 30, 30]} color={"cyan"} />  
-      <TorusKnot position = {[2, -2, 0]} size = {[1, 0.2, 64, 32]} color={"lime"} />  
-
-    </Canvas>
+      </Canvas>
+    </>
   )
 }
 
