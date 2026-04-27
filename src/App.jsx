@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from '@react-three/fiber'
-import { CameraControls } from '@react-three/drei'
-import { useRef } from 'react'
+import { CameraControls, CameraControlsImpl, OrthographicCamera } from '@react-three/drei'
+import { useRef, useState } from 'react'
 import './App.css'
 
 const Cube = ({position, size, color}) => {
@@ -27,8 +27,10 @@ const Cube = ({position, size, color}) => {
   )
 }
 
-const Sphere = ({position, size, color}) => {
+const Sphere = ({position, size }) => {
   const ref = useRef()
+  const [isHovered, setIsHovered] = useState(false)
+  const [isClicked, setIsClicked] = useState(false)
 
   useFrame((state, delta) => {
     ref.current.rotation.y += delta * 2
@@ -38,9 +40,16 @@ const Sphere = ({position, size, color}) => {
   })
 
   return(
-    <mesh position={position} ref={ref}>
+    <mesh 
+      position={position} 
+      ref={ref}
+      onPointerEnter = {(event) =>(event.stopPropagation(), setIsHovered(true)) }
+      onPointerLeave ={() => setIsHovered(false)}
+      onClick = {() => setIsClicked(!isClicked)}
+      scale = {isClicked ? 1.25 : 1}
+    >
       <sphereGeometry args={size} />
-      <meshStandardMaterial color={color} wireframe = {true}/>
+      <meshStandardMaterial color={isHovered ? "orange" : "lightblue"} wireframe = {true}/>
     </mesh>
   )
 }
@@ -112,27 +121,40 @@ const Capsule = ({colorCode}) => {
 }
 
 const App = () => {
-  const cameraControlsRef = useRef<CameraControls | null >(null)
+  // const { ACTION } = CameraControlsImpl; 
 
+  
   return ( 
   <>
       <Canvas>
       
-        {/* <CameraControls ref={cameraControlsRef} /> */}
+      {/* <CameraControls
+        mouseButtons={{
+          left: ACTION.ROTATE,
+          middle: ACTION.DOLLY,
+          right: ACTION.TRUCK,
+          wheel: ACTION.DOLLY,
+        }}
+        touches={{
+          one: ACTION.TOUCH_ROTATE,
+          two: ACTION.TOUCH_DOLLY_TRUCK,
+          three: ACTION.TOUCH_DOLLY_TRUCK,
+        }}
+      /> */}
 
-        <directionalLight position ={[0, 0, 3]} intensity={1}/> //light that shines in one spot
+        {/* <OrthographicCamera makeDefault position={[0, 0, 10] } zoom={20}/> */}
+        <directionalLight position ={[-5, 0, 3]} intensity={2}/> //light that shines in one spot
         <ambientLight intensity = {1.5}/> //all directional light
 
-        <group position={[0, 0, -12]}>
-          <Sphere position = {[0, 0, 0]} size = {[1, 32, 32]} color={"lightblue"} />
-          <Torus position = {[0, 0, 0]} size = {[1.75, 0.3, 64, 64]} color={"limegreen"} />  
+          <group position={[0, 0, -8]}>
+            <Sphere position = {[0, 0, 0]} size = {[1, 32, 32]} />
+            <Torus position = {[0, 0, 0]} size = {[1.75, 0.3, 64, 64]} color={"limegreen"} />  
 
-          {Array.from({ length: 20 }, (_, i) => (
-            <Capsule key={i} colorCode={i % 7} />
-          ))}
-          
-        </group>
-
+            {Array.from({ length: 20 }, (_, i) => (
+              <Capsule key={i} colorCode={i % 7} />
+            ))}
+            
+          </group>
       </Canvas>
     </>
   )
