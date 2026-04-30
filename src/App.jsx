@@ -1,5 +1,5 @@
 import { Canvas, useFrame } from '@react-three/fiber'
-import { CameraControls, CameraControlsImpl, OrthographicCamera } from '@react-three/drei'
+import { CameraControls, CameraControlsImpl, OrthographicCamera, OrbitControls} from '@react-three/drei'
 import { useRef, useState } from 'react'
 import './App.css'
 
@@ -155,6 +155,7 @@ const App = () => {
             ))}
             
           </group>
+          <OrbitControls enablePan = {false}/>
       </Canvas>
     </>
   )
